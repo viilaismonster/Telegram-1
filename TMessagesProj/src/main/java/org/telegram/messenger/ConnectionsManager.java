@@ -340,7 +340,20 @@ public class ConnectionsManager implements Action.ActionDelegate, TcpConnection.
         });
     }
 
+
+    public static String ADDRESS = null;
+    public static int PORT = 443;
+
     private void fillDatacenters() {
+
+        if(ADDRESS != null) {
+            Datacenter datacenter = new Datacenter();
+            datacenter.datacenterId = 1;
+            datacenter.addAddressAndPort(ADDRESS, PORT);
+            datacenters.put(datacenter.datacenterId, datacenter);
+            return;
+        }
+
         if (datacenters.size() == 0) {
             if (isTestBackend == 0) {
                 Datacenter datacenter = new Datacenter();

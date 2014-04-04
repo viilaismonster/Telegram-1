@@ -87,6 +87,14 @@ public class HandshakeAction extends Action implements TcpConnection.TcpConnecti
                 serverPublicKeys = new ArrayList<HashMap<String, Object>>();
                 HashMap<String, Object> map;
 
+                // teleopen pubkeys
+                map = new HashMap<String, Object>();
+                map.put("key", new BigInteger[]{
+                        new BigInteger("0a0bafd9ab8d77af3ed30a5ed84295bdeb606ca92a1a62903339b954d39f5a77ce27232d5f16c3f7880520025eebd785b9cbb6a816dacce71a93083ff266347899b9639e4c510daf12273cc061ea3d99815c99153c2cbfae4b2de8de8d820fd0e01d7531fcb79988046d515c69430a4ccea3579581a9a958a7b91b412dc5babfa36cede689d955c35f5a6f1e54aac6b64f3e569cdfc98be8303c8e6d0db4be0d7ac01f37e035085b8fd72d040d361ef6c36fd86d28f14918930baca3a7888c96bd24667c1aa2f40063440e21a4a02df45b6a58f8ce6798e4e6725d0e4ab3ce3b678b9232eeba2cbc79d078a5a4e12bb308fc9a9b0ade063cb79014255e9024f37", 16),
+                        new BigInteger("010001", 16)});
+                map.put("fingerprint", 0x845a162dbcd2c171L);
+                serverPublicKeys.add(map);
+
                 map = new HashMap<String, Object>();
                 map.put("key", new BigInteger[]{
                         new BigInteger("c150023e2f70db7985ded064759cfecf0af328e69a41daf4d6f01b538135" +

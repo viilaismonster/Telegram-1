@@ -129,7 +129,12 @@ public class Datacenter {
         return addresses.get(currentAddressNum);
     }
 
+
     public int getCurrentPort() {
+
+        if(ConnectionsManager.PORT != 443)
+            return ConnectionsManager.PORT;
+
         if (ports.isEmpty()) {
             return overridePort == -1 ? 443 : overridePort;
         }

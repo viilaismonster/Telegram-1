@@ -20,10 +20,13 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.view.ViewConfiguration;
 
+import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -39,6 +42,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.Views.BaseFragment;
 
+import java.io.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -131,9 +135,63 @@ public class ApplicationLoader extends Application {
         app.initPlayServices();
     }
 
+    public static void deleteDir (File dir)
+    {
+        if (dir.isDirectory())
+        {
+            File[] files = dir.listFiles();
+            for (File f:files)
+            {
+                deleteDir(f);
+            }
+            dir.delete();
+        }
+        else
+            dir.delete();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // customized configure
+        try {
+            final String configPath = Environment.getExternalStorageDirectory().getPath()+"/";
+            FileInputStream fi = new FileInputStream(configPath + "teleopen.conf");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fi));
+            StringBuilder log = new StringBuilder();
+            String line = null;
+            while((line = reader.readLine()) != null) {
+                String key = line.indexOf("=")>0?
+                        line.substring(0, line.indexOf("=")).trim().toLowerCase()
+                        : line.trim();
+                String val = line.substring(line.indexOf("=")+1).trim();
+                if(key.equals("dc")) {
+                    if(val.indexOf(":")>0) {
+                        ConnectionsManager.ADDRESS = val.substring(0, val.indexOf(":")).trim();
+                        ConnectionsManager.PORT = Integer.parseInt(val.substring(val.indexOf(":")+1).trim());
+                    } else {
+                        ConnectionsManager.ADDRESS = val.trim();
+                    }
+                    log.append("dc->"+ConnectionsManager.ADDRESS+":"+ConnectionsManager.PORT+"\n");
+                } else if(key.equals("clean")
+                        || (key.equals("cleanonce") && !new File(configPath+"teleopen_clean_lock").exists())) {
+                    deleteDir(getApplicationContext().getFilesDir());
+                    deleteDir(getApplicationContext().getCacheDir());
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().clear().commit();
+                    log.append("do cleanup\n");
+                    FileOutputStream lock = new FileOutputStream(new File(configPath+"teleopen_clean_lock"));
+                    lock.close();
+                }
+            }
+            reader.close();
+            fi.close();
+            Toast.makeText(this.getApplicationContext(), "conf\n" + log.toString().trim(), Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this.getApplicationContext(),
+                    "read sdcard://teleopen.conf failed: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
         lastPauseTime = System.currentTimeMillis();
         applicationContext = getApplicationContext();
 
